@@ -2,6 +2,7 @@
 using KitchenData;
 using KitchenMods;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Unity.Collections;
@@ -49,15 +50,9 @@ namespace ThoseWereTheDays
             if (!SettingLayoutProfiles.TryGetValidLayoutIDs(setting_id, out int[] valid_layouts))
                 return;
 
-            foreach (int layoutID in valid_layouts)
-            {
-                if (!AssetReference.FixedRunLayout.Contains(layoutID))
-                    AssetReference.FixedRunLayout = AssetReference.FixedRunLayout.Append(layoutID).ToArray();
-            }
-
-
             base.EntityManager.DestroyEntity(MapItems);
 
+            SettingLayoutProfiles.ReplaceAssetReferences(valid_layouts);
             using NativeArray<Entity> pedestalEntities = Slots.ToEntityArray(Allocator.Temp);
             foreach (Entity pedestalEntity in pedestalEntities)
             {
@@ -74,6 +69,7 @@ namespace ThoseWereTheDays
                 base.EntityManager.SetComponentData(pedestalEntity, (CItemHolder)mapEntity);
                 base.EntityManager.SetComponentData(mapEntity, (CHeldBy)pedestalEntity);
             }
+            SettingLayoutProfiles.RestoreAssetReferences();
             comp.HasBeenCreated = true;
             Set(comp);
         }
