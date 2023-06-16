@@ -19,7 +19,7 @@ namespace ThoseWereTheDays
         // Mod Version must follow semver notation e.g. "1.2.3"
         public const string MOD_GUID = "IcedMilo.PlateUp.ThoseWereTheDays";
         public const string MOD_NAME = "Those Were The Days";
-        public const string MOD_VERSION = "0.1.1";
+        public const string MOD_VERSION = "0.1.2";
         public const string MOD_AUTHOR = "IcedMilo";
         public const string MOD_GAMEVERSION = ">=1.1.5";
         // Game version this mod is designed for in semver
@@ -32,7 +32,8 @@ namespace ThoseWereTheDays
         {
             { 507410699, LayoutProfileReferences.JanuaryLayoutProfile },
             { 1766067755, LayoutProfileReferences.FebruaryLayout },
-            { 1736695492, LayoutProfileReferences.TurboDinerLayout }
+            { 1736695492, LayoutProfileReferences.TurboDinerLayout },
+            { -851159532, LayoutProfileReferences.LayoutProfile }
         };
 
         internal static HashSet<int> AdditionalSettingsNoDistinctLayout = new HashSet<int>();
@@ -71,19 +72,12 @@ namespace ThoseWereTheDays
             // Register custom GDOs
             AddGameData();
 
-            Dictionary<int, int> customSettingLayouts = new Dictionary<int, int>()
-            {
-                { 507410699, LayoutProfileReferences.JanuaryLayoutProfile },
-                { 1766067755, LayoutProfileReferences.FebruaryLayout },
-                { 1736695492, LayoutProfileReferences.TurboDinerLayout }
-            };
-
             // Perform actions when game data is built
             Events.BuildGameDataEvent += delegate (object s, BuildGameDataEventArgs args)
             {
                 BuiltOnce = true;
 
-                foreach (KeyValuePair<int, int> settingLayout in customSettingLayouts)
+                foreach (KeyValuePair<int, int> settingLayout in CustomSettingLayouts)
                 {
                     if (args.gamedata.TryGet(settingLayout.Value, out LayoutProfile layout, warn_if_fail: true))
                     {

@@ -36,10 +36,12 @@
 	  <None Remove="*.png" />
 	</ItemGroup>
 	<ItemGroup>
+	  <Compile Remove="AssignHalloweenOrders.cs" />
 	  <Compile Remove="Customs\FebruaryLayoutProfileCopy.cs" />
 	  <Compile Remove="Customs\MediumLayoutProfileCopy.cs" />
 	</ItemGroup>
 	<ItemGroup>
+	  <None Include="AssignHalloweenOrders.cs" />
 	  <None Include="Customs\FebruaryLayoutProfileCopy.cs" />
 	  <None Include="Customs\MediumLayoutProfileCopy.cs" />
 	</ItemGroup>
