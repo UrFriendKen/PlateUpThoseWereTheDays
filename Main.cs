@@ -1,13 +1,13 @@
 ﻿using KitchenData;
 using KitchenLib;
 using KitchenLib.Event;
-using KitchenMods;
-//using ThoseWereTheDays.Customs;
-using System.Reflection;
-using UnityEngine;
 using KitchenLib.References;
+using KitchenMods;
 using System.Collections.Generic;
+using System.Reflection;
 using ThoseWereTheDays.Customs;
+using UnityEngine;
+using CustomSettingsAndLayouts;
 
 // Namespace should have "Kitchen" in the beginning
 namespace ThoseWereTheDays
@@ -19,26 +19,34 @@ namespace ThoseWereTheDays
         // Mod Version must follow semver notation e.g. "1.2.3"
         public const string MOD_GUID = "IcedMilo.PlateUp.ThoseWereTheDays";
         public const string MOD_NAME = "Those Were The Days";
-        public const string MOD_VERSION = "0.1.3";
+        public const string MOD_VERSION = "0.2.1";
         public const string MOD_AUTHOR = "IcedMilo";
         public const string MOD_GAMEVERSION = ">=1.1.5";
         // Game version this mod is designed for in semver
         // e.g. ">=1.1.3" current and all future
         // e.g. ">=1.1.3 <=1.2.3" for all from/until
 
-        internal static bool BuiltOnce = false;
-
-        internal static Dictionary<int, int> CustomSettingLayouts = new Dictionary<int, int>()
+        internal static Dictionary<int, int> CustomSettingLayouts => new Dictionary<int, int>()
         {
-            { 507410699, LayoutProfileReferences.JanuaryLayoutProfile },
-            { 1766067755, LayoutProfileReferences.FebruaryLayout },
-            { 1736695492, LayoutProfileReferences.TurboDinerLayout },
-            { -851159532, LayoutProfileReferences.LayoutProfile }
+            { RestaurantSettingReferences.JanuarySetting, LayoutProfileReferences.JanuaryLayoutProfile },
+            { RestaurantSettingReferences.FebruarySetting, LayoutProfileReferences.FebruaryLayout },//_februaryLayoutProfileCopy?.GameDataObject?.ID ?? 0 },
+            { RestaurantSettingReferences.MarchSetting, LayoutProfileReferences.TurboDinerLayout },
+            { RestaurantSettingReferences.SantaWorkshopSetting, LayoutProfileReferences.LayoutProfile }//_northPoleLayoutProfileCopy?.GameDataObject?.ID ?? 0 }//
         };
 
-        internal static HashSet<int> AdditionalSettingsNoDistinctLayout = new HashSet<int>();
+        internal static HashSet<int> AdditionalLayoutsNoDistinctSetting = new HashSet<int>()
+        {
+            LayoutProfileReferences.MediumLayout
+        };
 
-        HalloweenCardsModularUnlockPack _halloweenCardsModularUnlockPack;
+        internal static HashSet<int> AdditionalSettingsNoDistinctLayout = new HashSet<int>()
+        {
+            RestaurantSettingReferences.Halloween
+        };
+
+        static HalloweenCardsModularUnlockPack _halloweenCardsModularUnlockPack;
+        static NorthPoleLayoutProfileCopy _northPoleLayoutProfileCopy;
+        //static FebruaryLayoutProfileCopy _februaryLayoutProfileCopy;
 
         public Main() : base(MOD_GUID, MOD_NAME, MOD_AUTHOR, MOD_VERSION, MOD_GAMEVERSION, Assembly.GetExecutingAssembly()) { }
 
@@ -52,6 +60,8 @@ namespace ThoseWereTheDays
             LogInfo("Attempting to register game data...");
 
             _halloweenCardsModularUnlockPack = AddGameDataObject<HalloweenCardsModularUnlockPack>();
+            _northPoleLayoutProfileCopy = AddGameDataObject<NorthPoleLayoutProfileCopy>();
+            //_februaryLayoutProfileCopy = AddGameDataObject<FebruaryLayoutProfileCopy>();
 
             LogInfo("Done loading game data.");
         }
@@ -75,15 +85,14 @@ namespace ThoseWereTheDays
             // Perform actions when game data is built
             Events.BuildGameDataEvent += delegate (object s, BuildGameDataEventArgs args)
             {
-                BuiltOnce = true;
-
                 foreach (KeyValuePair<int, int> settingLayout in CustomSettingLayouts)
                 {
                     if (args.gamedata.TryGet(settingLayout.Value, out LayoutProfile layout, warn_if_fail: true))
                     {
                         if (args.gamedata.TryGet(settingLayout.Key, out RestaurantSetting setting, warn_if_fail: true))
                         {
-                            SettingLayoutProfiles.Add(setting, layout, noDuplicates: true);
+                            Registry.GrantCustomSetting(setting);
+                            Registry.AddSettingLayout(setting, layout, noDuplicates: true);
                         }
                     }
                 }
@@ -108,11 +117,27 @@ namespace ThoseWereTheDays
                     {
                         halloweenCompositePack.Packs[0] = franchiseModularPack;
                         halloweenSetting.UnlockPack = halloweenCompositePack;
-                        Main.AdditionalSettingsNoDistinctLayout.Add(halloweenSettingID);
+                        Registry.GrantCustomSetting(halloweenSetting);
                     }
                     else
                     {
                         Main.LogError("Failed to replace normal cards");
+                    }
+                }
+
+                foreach (int settingID in AdditionalSettingsNoDistinctLayout)
+                {
+                    if (args.gamedata.TryGet(settingID, out RestaurantSetting setting, warn_if_fail: true))
+                    {
+                        Registry.GrantCustomSetting(setting);
+                    }
+                }
+
+                foreach (int layoutID in AdditionalLayoutsNoDistinctSetting)
+                {
+                    if (args.gamedata.TryGet(layoutID, out LayoutProfile layout, warn_if_fail: true))
+                    {
+                        Registry.AddGenericLayout(layout);
                     }
                 }
 
