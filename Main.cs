@@ -19,7 +19,7 @@ namespace ThoseWereTheDays
         // Mod Version must follow semver notation e.g. "1.2.3"
         public const string MOD_GUID = "IcedMilo.PlateUp.ThoseWereTheDays";
         public const string MOD_NAME = "Those Were The Days";
-        public const string MOD_VERSION = "0.2.1";
+        public const string MOD_VERSION = "0.2.2";
         public const string MOD_AUTHOR = "IcedMilo";
         public const string MOD_GAMEVERSION = ">=1.1.5";
         // Game version this mod is designed for in semver
@@ -30,7 +30,7 @@ namespace ThoseWereTheDays
         {
             { RestaurantSettingReferences.JanuarySetting, LayoutProfileReferences.JanuaryLayoutProfile },
             { RestaurantSettingReferences.FebruarySetting, LayoutProfileReferences.FebruaryLayout },//_februaryLayoutProfileCopy?.GameDataObject?.ID ?? 0 },
-            { RestaurantSettingReferences.MarchSetting, LayoutProfileReferences.TurboDinerLayout },
+            { _turboRestaurantSettingCopy?.ID ?? 0, LayoutProfileReferences.TurboDinerLayout },
             { RestaurantSettingReferences.SantaWorkshopSetting, LayoutProfileReferences.LayoutProfile }//_northPoleLayoutProfileCopy?.GameDataObject?.ID ?? 0 }//
         };
 
@@ -45,7 +45,8 @@ namespace ThoseWereTheDays
         };
 
         static HalloweenCardsModularUnlockPack _halloweenCardsModularUnlockPack;
-        static NorthPoleLayoutProfileCopy _northPoleLayoutProfileCopy;
+        //static NorthPoleLayoutProfileCopy _northPoleLayoutProfileCopy;
+        static TurboRestaurantSettingCopy _turboRestaurantSettingCopy;
         //static FebruaryLayoutProfileCopy _februaryLayoutProfileCopy;
 
         public Main() : base(MOD_GUID, MOD_NAME, MOD_AUTHOR, MOD_VERSION, MOD_GAMEVERSION, Assembly.GetExecutingAssembly()) { }
@@ -60,7 +61,8 @@ namespace ThoseWereTheDays
             LogInfo("Attempting to register game data...");
 
             _halloweenCardsModularUnlockPack = AddGameDataObject<HalloweenCardsModularUnlockPack>();
-            _northPoleLayoutProfileCopy = AddGameDataObject<NorthPoleLayoutProfileCopy>();
+            //_northPoleLayoutProfileCopy = AddGameDataObject<NorthPoleLayoutProfileCopy>();
+            _turboRestaurantSettingCopy = AddGameDataObject<TurboRestaurantSettingCopy>();
             //_februaryLayoutProfileCopy = AddGameDataObject<FebruaryLayoutProfileCopy>();
 
             LogInfo("Done loading game data.");
