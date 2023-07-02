@@ -8,6 +8,7 @@ using System.Reflection;
 using ThoseWereTheDays.Customs;
 using UnityEngine;
 using CustomSettingsAndLayouts;
+using PreferenceSystem.Utils;
 
 // Namespace should have "Kitchen" in the beginning
 namespace ThoseWereTheDays
@@ -19,9 +20,9 @@ namespace ThoseWereTheDays
         // Mod Version must follow semver notation e.g. "1.2.3"
         public const string MOD_GUID = "IcedMilo.PlateUp.ThoseWereTheDays";
         public const string MOD_NAME = "Those Were The Days";
-        public const string MOD_VERSION = "0.2.2";
+        public const string MOD_VERSION = "0.2.4";
         public const string MOD_AUTHOR = "IcedMilo";
-        public const string MOD_GAMEVERSION = ">=1.1.5";
+        public const string MOD_GAMEVERSION = ">=1.1.6";
         // Game version this mod is designed for in semver
         // e.g. ">=1.1.3" current and all future
         // e.g. ">=1.1.3 <=1.2.3" for all from/until
@@ -31,12 +32,8 @@ namespace ThoseWereTheDays
             { RestaurantSettingReferences.JanuarySetting, LayoutProfileReferences.JanuaryLayoutProfile },
             { RestaurantSettingReferences.FebruarySetting, LayoutProfileReferences.FebruaryLayout },//_februaryLayoutProfileCopy?.GameDataObject?.ID ?? 0 },
             { _turboRestaurantSettingCopy?.ID ?? 0, LayoutProfileReferences.TurboDinerLayout },
+            { 1970109064, -1203731809 }, // Coffee Shop
             { RestaurantSettingReferences.SantaWorkshopSetting, LayoutProfileReferences.LayoutProfile }//_northPoleLayoutProfileCopy?.GameDataObject?.ID ?? 0 }//
-        };
-
-        internal static HashSet<int> AdditionalLayoutsNoDistinctSetting = new HashSet<int>()
-        {
-            LayoutProfileReferences.MediumLayout
         };
 
         internal static HashSet<int> AdditionalSettingsNoDistinctLayout = new HashSet<int>()
@@ -135,13 +132,46 @@ namespace ThoseWereTheDays
                     }
                 }
 
-                foreach (int layoutID in AdditionalLayoutsNoDistinctSetting)
+                // Restore Turbo allow base mains
+                if (args.gamedata.TryGet(ModularUnlockPackReferences.MarchCards, out ModularUnlockPack marchCards, warn_if_fail: true))
                 {
-                    if (args.gamedata.TryGet(layoutID, out LayoutProfile layout, warn_if_fail: true))
+                    bool changedAllowBaseDishes = false;
+                    foreach (IUnlockFilter filter in marchCards.Filter)
                     {
-                        Registry.AddGenericLayout(layout);
+                        if (filter is FilterBasic filterBasic)
+                        {
+                            filterBasic.AllowBaseDishes = true;
+                            Main.LogWarning("Successfully modified March Cards to allow base dishes");
+                            changedAllowBaseDishes = true;
+                            break;
+                        }
+                    }
+                    if (!changedAllowBaseDishes)
+                    {
+                        Main.LogWarning("Failed to modify March Cards to allow base dishes");
                     }
                 }
+
+
+                // Transfer BlockAllDishes and AllowedDishes
+                if (args.gamedata.TryGet(16318784, out Dish coffeeBaseDessert, warn_if_fail: true) &&
+                    args.gamedata.TryGet(746549422, out UnlockCard coffeeShopMode, warn_if_fail: true))
+                {
+                    coffeeBaseDessert.BlocksAllOtherFood = false;
+                    coffeeShopMode.BlocksAllOtherFood = true;
+
+                    if (!coffeeBaseDessert.AllowedFoods.IsNullOrEmpty())
+                    {
+                        foreach (Unlock allowedFood in coffeeBaseDessert.AllowedFoods)
+                        {
+                            if (!coffeeShopMode.AllowedFoods.Contains(allowedFood))
+                                coffeeShopMode.AllowedFoods.Add(allowedFood);
+                        }
+                        coffeeBaseDessert.AllowedFoods.Clear();
+                    }
+                }
+
+
 
                 // Log Layout Profile Connections
 
