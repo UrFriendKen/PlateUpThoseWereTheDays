@@ -9,6 +9,11 @@ using ThoseWereTheDays.Customs;
 using UnityEngine;
 using CustomSettingsAndLayouts;
 using PreferenceSystem.Utils;
+using Kitchen.Layouts;
+using XNode;
+using System.Linq;
+using LogoMaker.Helpers;
+using static Unity.Entities.FastEquality;
 
 // Namespace should have "Kitchen" in the beginning
 namespace ThoseWereTheDays
@@ -20,7 +25,7 @@ namespace ThoseWereTheDays
         // Mod Version must follow semver notation e.g. "1.2.3"
         public const string MOD_GUID = "IcedMilo.PlateUp.ThoseWereTheDays";
         public const string MOD_NAME = "Those Were The Days";
-        public const string MOD_VERSION = "0.2.4";
+        public const string MOD_VERSION = "0.2.5";
         public const string MOD_AUTHOR = "IcedMilo";
         public const string MOD_GAMEVERSION = ">=1.1.6";
         // Game version this mod is designed for in semver
@@ -33,8 +38,20 @@ namespace ThoseWereTheDays
             { RestaurantSettingReferences.FebruarySetting, LayoutProfileReferences.FebruaryLayout },//_februaryLayoutProfileCopy?.GameDataObject?.ID ?? 0 },
             { _turboRestaurantSettingCopy?.ID ?? 0, LayoutProfileReferences.TurboDinerLayout },
             { 1970109064, -1203731809 }, // Coffee Shop
-            { RestaurantSettingReferences.SantaWorkshopSetting, LayoutProfileReferences.LayoutProfile }//_northPoleLayoutProfileCopy?.GameDataObject?.ID ?? 0 }//
+            { RestaurantSettingReferences.SantaWorkshopSetting, LayoutProfileReferences.LayoutProfile },//_northPoleLayoutProfileCopy?.GameDataObject?.ID ?? 0 }//
         };
+
+        internal static Dictionary<int, HashSet<int>> SettingSpecialDecoration => new Dictionary<int, HashSet<int>>()
+        {
+            { RestaurantSettingReferences.FebruarySetting, new HashSet<int>() { ApplianceReferences.FlowerArch, ApplianceReferences.HeartBalloons, ApplianceReferences.LoveSign } },
+            { RestaurantSettingReferences.SantaWorkshopSetting, new HashSet<int>() { ApplianceReferences.ChristmasBanner, ApplianceReferences.ChristmasTree } },
+            { RestaurantSettingReferences.Halloween, new HashSet<int>() { ApplianceReferences.Pumpkin, ApplianceReferences.Cobwebs, ApplianceReferences.GhostStatue } }
+        };
+
+        //internal static Dictionary<int, HashSet<int>> SettingDisabledAppliances => new Dictionary<int, HashSet<int>>()
+        //{
+        //    { RestaurantSettingReferences.FebruarySetting, new HashSet<int>() { ApplianceReferences.Hob, ApplianceReferences.PlateStack, ApplianceReferences.BlueprintUpgradeDesk, ApplianceReferences.TableLarge } }
+        //};
 
         internal static HashSet<int> AdditionalSettingsNoDistinctLayout = new HashSet<int>()
         {
@@ -95,6 +112,36 @@ namespace ThoseWereTheDays
                         }
                     }
                 }
+
+                foreach (KeyValuePair<int, HashSet<int>> settingSpecialDecorations in SettingSpecialDecoration)
+                {
+                    if (args.gamedata.TryGet(settingSpecialDecorations.Key, out RestaurantSetting setting, warn_if_fail: true))
+                    {
+                        foreach (int applianceID in settingSpecialDecorations.Value)
+                        {
+                            if (args.gamedata.TryGet(applianceID, out Appliance appliance, warn_if_fail: true))
+                            {
+                                appliance.ShoppingTags |= ShoppingTags.SpecialEvent;
+                                appliance.IsPurchasable = true;
+                                Registry.AddSettingDecoration(setting, appliance);
+                            }
+                        }
+                    }
+                }
+
+                //foreach (KeyValuePair<int, HashSet<int>> settingDisableAppliances in SettingDisabledAppliances)
+                //{
+                //    if (args.gamedata.TryGet(settingDisableAppliances.Key, out RestaurantSetting setting, warn_if_fail: true))
+                //    {
+                //        foreach (int applianceID in settingDisableAppliances.Value)
+                //        {
+                //            if (args.gamedata.TryGet(applianceID, out Appliance appliance, warn_if_fail: true))
+                //            {
+                //                Registry.AddSettingDisabledAppliance(setting, appliance);
+                //            }
+                //        }
+                //    }
+                //}
 
                 int halloweenSettingID = 82131534; // To be replaced with KitchenLib reference once RestaurantSettingReferences is added.
                 if (args.gamedata.TryGet(CompositeUnlockPackReferences.HalloweenPack, out CompositeUnlockPack halloweenCompositePack, warn_if_fail: true) &&
@@ -172,62 +219,68 @@ namespace ThoseWereTheDays
                 }
 
 
+                HashSet<int> layoutIDs = new HashSet<int>()
+                {
+                    LayoutProfileReferences.LayoutProfile,
+                    LayoutProfileReferences.FebruaryLayout,
+                    LayoutProfileReferences.JanuaryLayoutProfile,
+                    LayoutProfileReferences.TurboDinerLayout,
+                    LayoutProfileReferences.BasicLayout,
+                    LayoutProfileReferences.DinerLayout,
+                    LayoutProfileReferences.ExtendedLayout,
+                    LayoutProfileReferences.HugeLayout,
+                    LayoutProfileReferences.MediumLayout
+                };
 
                 // Log Layout Profile Connections
 
-                //HashSet<int> layoutIDs = new HashSet<int>()
-                //{
-                //    LayoutProfileReferences.LayoutProfile,
-                //    LayoutProfileReferences.FebruaryLayout,
-                //    LayoutProfileReferences.JanuaryLayoutProfile,
-                //    LayoutProfileReferences.TurboDinerLayout,
-                //    LayoutProfileReferences.BasicLayout,
-                //    LayoutProfileReferences.DinerLayout,
-                //    LayoutProfileReferences.ExtendedLayout,
-                //    LayoutProfileReferences.HugeLayout,
-                //    LayoutProfileReferences.MediumLayout
-                //};
-
-                //FieldInfo f_ports = typeof(Node).GetField("ports", BindingFlags.NonPublic | BindingFlags.Instance);
-                //foreach (int layoutID in layoutIDs)
-                //{
-                //    if (args.gamedata.TryGet(layoutID, out LayoutProfile layout))
-                //    {
-                //        Main.LogInfo($"{(layout.Name.IsNullOrEmpty() ? layout.GetType().FullName : layout.name)} Graph");
-                //        LayoutGraph graph = layout.Graph;
-                //        List<Node> nodes = graph.nodes;
-                //        for (int i = 0; i < nodes.Count; i++)
-                //        {
-                //            if (nodes[i] == null)
-                //            {
-                //                Main.LogInfo("null");
-                //                continue;
-                //            }
-
-                //            object obj = f_ports.GetValue(nodes[i]);
-                //            if (obj == null || !(obj is Dictionary<string, NodePort> nodeDictionary))
-                //            {
-                //                Main.LogError($"Failed to get Node Dictionary from {nodes[i].GetType()}");
-                //                continue;
-                //            }
-                //            if (!nodeDictionary.TryGetValue("Output", out NodePort outputPort))
-                //            {
-                //                Main.LogError($"Failed to get Output Node from {nodes[i].GetType()}");
-                //                continue;
-                //            }
-                //            if (!nodeDictionary.TryGetValue("Input", out NodePort inputPort))
-                //            {
-                //                Main.LogError($"Failed to get Input Node from {nodes[i].GetType()}");
-                //                continue;
-                //            }
-
-                //            Main.LogInfo($"{(inputPort.GetConnections().Any() ? $"{$"{string.Join(", ", inputPort.GetConnections().Select(x => $"{x.node.GetType()}|{x.fieldName}"))}"} - " : "")}" +
-                //                $"{nodes[i].GetType()}" + $"{(outputPort.GetConnections().Any() ? $" - {string.Join(", ", outputPort.GetConnections().Select(x => $"{x.node.GetType()}|{x.fieldName}"))}" : "")}");
-                //        }
-                //    }
-                //}
+                foreach (int layoutID in layoutIDs)
+                {
+                    LogLayoutGraphConnections(args.gamedata, layoutID);
+                }
             };
         }
+
+        public static void LogLayoutGraphConnections(GameData gameData, int layoutID)
+        {
+            FieldInfo f_ports = typeof(Node).GetField("ports", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (gameData.TryGet(layoutID, out LayoutProfile layout))
+            {
+                Main.LogInfo($"{(layout.Name.IsNullOrEmpty() ? layout.GetType().FullName : layout.name)} Graph");
+                LayoutGraph graph = layout.Graph;
+                List<Node> nodes = graph.nodes;
+                for (int i = 0; i < nodes.Count; i++)
+                {
+                    if (nodes[i] == null)
+                    {
+                        Main.LogInfo("null");
+                        continue;
+                    }
+
+                    object obj = f_ports.GetValue(nodes[i]);
+                    if (obj == null || !(obj is Dictionary<string, NodePort> nodeDictionary))
+                    {
+                        Main.LogError($"Failed to get Node Dictionary from {nodes[i].GetType()}");
+                        continue;
+                    }
+                    if (!nodeDictionary.TryGetValue("Output", out NodePort outputPort))
+                    {
+                        Main.LogError($"Failed to get Output Node from {nodes[i].GetType()}");
+                        continue;
+                    }
+                    if (!nodeDictionary.TryGetValue("Input", out NodePort inputPort))
+                    {
+                        Main.LogError($"Failed to get Input Node from {nodes[i].GetType()}");
+                        continue;
+                    }
+
+                    Main.LogInfo($"{(inputPort.GetConnections().Any() ? $"{$"{string.Join(", ", inputPort.GetConnections().Select(x => $"{x.node.GetType()}|{x.fieldName}"))}"}-" : "")}" +
+                        $"{nodes[i].GetType()}" + $"{(outputPort.GetConnections().Any() ? $"-{string.Join(", ", outputPort.GetConnections().Select(x => $"{x.node.GetType()}|{x.fieldName}"))}" : "")}");
+                }
+            }
+        }
+
+
         #region Logging
         public static void LogInfo(string _log) { Debug.Log($"[{MOD_NAME}] " + _log); }
         public static void LogWarning(string _log) { Debug.LogWarning($"[{MOD_NAME}] " + _log); }

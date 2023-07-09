@@ -42,15 +42,17 @@
 	  <Compile Remove="Customs\NorthPoleLayoutProfileCopy.cs" />
 	</ItemGroup>
 	<ItemGroup>
-	  <None Include="AssignHalloweenOrders.cs" />
 	  <None Include="Customs\FebruaryLayoutProfileCopy.cs" />
+	</ItemGroup>
+	<ItemGroup>
+	  <None Include="AssignHalloweenOrders.cs" />
 	  <None Include="Customs\MediumLayoutProfileCopy.cs" />
 	  <None Include="Customs\NorthPoleLayoutProfileCopy.cs" />
 	</ItemGroup>
   
 	<ItemGroup>
 		<PackageReference Include="MessagePack.Annotations" Version="2.4.59" />
-		<PackageReference Include="Yariazen.PlateUp.ModBuildUtilities" Version="1.9.0" />
+		<PackageReference Include="Yariazen.PlateUp.ModBuildUtilities" Version="1.10.21" />
 	
 		<!-- For if you build KitchenLib locally -->
 		<Reference Include="KitchenLib">
