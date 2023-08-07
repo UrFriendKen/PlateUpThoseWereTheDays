@@ -34,11 +34,11 @@ namespace ThoseWereTheDays.Customs
 
         public override Unlock StartingUnlock => (UnlockCard)GDOUtils.GetExistingGDO(UnlockCardReferences.TurboMode);
 
-        public override GameObject Prefab => ((RestaurantSetting)GDOUtils.GetExistingGDO(RestaurantSettingReferences.MarchSetting))?.Prefab;
+        public override GameObject Prefab => ((RestaurantSetting)GDOUtils.GetExistingGDO(RestaurantSettingReferences.MarchSettingTurbo))?.Prefab;
 
         public override bool AlwaysLight => true;
 
-        public override List<(Locale, BasicInfo)> InfoList => CopyInfo(RestaurantSettingReferences.MarchSetting);
+        public override List<(Locale, BasicInfo)> InfoList => CopyInfo(RestaurantSettingReferences.MarchSettingTurbo);
 
         private static List<(Locale, BasicInfo)> CopyInfo(int restaurantSettingID)
         {

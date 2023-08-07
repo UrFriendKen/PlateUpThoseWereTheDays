@@ -1,19 +1,17 @@
-﻿using KitchenData;
+﻿using Kitchen.Layouts;
+using KitchenData;
 using KitchenLib;
 using KitchenLib.Event;
 using KitchenLib.References;
-using KitchenMods;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using ThoseWereTheDays.Customs;
 using UnityEngine;
+using XNode;
+using KitchenMods;
 using CustomSettingsAndLayouts;
 using PreferenceSystem.Utils;
-using Kitchen.Layouts;
-using XNode;
-using System.Linq;
-using LogoMaker.Helpers;
-using static Unity.Entities.FastEquality;
 
 // Namespace should have "Kitchen" in the beginning
 namespace ThoseWereTheDays
@@ -25,7 +23,7 @@ namespace ThoseWereTheDays
         // Mod Version must follow semver notation e.g. "1.2.3"
         public const string MOD_GUID = "IcedMilo.PlateUp.ThoseWereTheDays";
         public const string MOD_NAME = "Those Were The Days";
-        public const string MOD_VERSION = "0.2.5";
+        public const string MOD_VERSION = "0.2.7";
         public const string MOD_AUTHOR = "IcedMilo";
         public const string MOD_GAMEVERSION = ">=1.1.6";
         // Game version this mod is designed for in semver
@@ -39,6 +37,7 @@ namespace ThoseWereTheDays
             { _turboRestaurantSettingCopy?.ID ?? 0, LayoutProfileReferences.TurboDinerLayout },
             { 1970109064, -1203731809 }, // Coffee Shop
             { RestaurantSettingReferences.SantaWorkshopSetting, LayoutProfileReferences.LayoutProfile },//_northPoleLayoutProfileCopy?.GameDataObject?.ID ?? 0 }//
+            { -31920316, 206333080 }, // Bakery
         };
 
         internal static Dictionary<int, HashSet<int>> SettingSpecialDecoration => new Dictionary<int, HashSet<int>>()
@@ -200,9 +199,19 @@ namespace ThoseWereTheDays
                 }
 
 
+                HashSet<int> coffeeShopAllowedFoods = new HashSet<int>()
+                {
+                    DishReferences.CoffeeCakeStand,
+                    DishReferences.CoffeeIced,
+                    DishReferences.CoffeeLatte,
+                    DishReferences.ExtraMilk,
+                    DishReferences.ExtraSugar,
+                    DishReferences.CoffeeCakeStand,
+                    DishReferences.Tea
+                };
                 // Transfer BlockAllDishes and AllowedDishes
-                if (args.gamedata.TryGet(16318784, out Dish coffeeBaseDessert, warn_if_fail: true) &&
-                    args.gamedata.TryGet(746549422, out UnlockCard coffeeShopMode, warn_if_fail: true))
+                if (args.gamedata.TryGet(UnlockReferences.CoffeeBaseDessert, out Dish coffeeBaseDessert, warn_if_fail: true) &&
+                    args.gamedata.TryGet(UnlockReferences.CoffeeshopMode, out UnlockCard coffeeShopMode, warn_if_fail: true))
                 {
                     coffeeBaseDessert.BlocksAllOtherFood = false;
                     coffeeShopMode.BlocksAllOtherFood = true;
@@ -216,28 +225,36 @@ namespace ThoseWereTheDays
                         }
                         coffeeBaseDessert.AllowedFoods.Clear();
                     }
+
+                    foreach (int dishID in coffeeShopAllowedFoods)
+                    {
+                        if (args.gamedata.TryGet(dishID, out Dish dish) && !coffeeShopMode.AllowedFoods.Contains(dish))
+                        {
+                            coffeeShopMode.AllowedFoods.Add(dish);
+                        }
+                    }
                 }
 
 
-                HashSet<int> layoutIDs = new HashSet<int>()
-                {
-                    LayoutProfileReferences.LayoutProfile,
-                    LayoutProfileReferences.FebruaryLayout,
-                    LayoutProfileReferences.JanuaryLayoutProfile,
-                    LayoutProfileReferences.TurboDinerLayout,
-                    LayoutProfileReferences.BasicLayout,
-                    LayoutProfileReferences.DinerLayout,
-                    LayoutProfileReferences.ExtendedLayout,
-                    LayoutProfileReferences.HugeLayout,
-                    LayoutProfileReferences.MediumLayout
-                };
+                //HashSet<int> layoutIDs = new HashSet<int>()
+                //{
+                //    LayoutProfileReferences.LayoutProfile,
+                //    LayoutProfileReferences.FebruaryLayout,
+                //    LayoutProfileReferences.JanuaryLayoutProfile,
+                //    LayoutProfileReferences.TurboDinerLayout,
+                //    LayoutProfileReferences.BasicLayout,
+                //    LayoutProfileReferences.DinerLayout,
+                //    LayoutProfileReferences.ExtendedLayout,
+                //    LayoutProfileReferences.HugeLayout,
+                //    LayoutProfileReferences.MediumLayout
+                //};
 
-                // Log Layout Profile Connections
+                //// Log Layout Profile Connections
 
-                foreach (int layoutID in layoutIDs)
-                {
-                    LogLayoutGraphConnections(args.gamedata, layoutID);
-                }
+                //foreach (int layoutID in layoutIDs)
+                //{
+                //    LogLayoutGraphConnections(args.gamedata, layoutID);
+                //}
             };
         }
 
