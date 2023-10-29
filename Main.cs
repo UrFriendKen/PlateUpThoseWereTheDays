@@ -23,7 +23,7 @@ namespace ThoseWereTheDays
         // Mod Version must follow semver notation e.g. "1.2.3"
         public const string MOD_GUID = "IcedMilo.PlateUp.ThoseWereTheDays";
         public const string MOD_NAME = "Those Were The Days";
-        public const string MOD_VERSION = "0.2.7";
+        public const string MOD_VERSION = "0.2.8";
         public const string MOD_AUTHOR = "IcedMilo";
         public const string MOD_GAMEVERSION = ">=1.1.6";
         // Game version this mod is designed for in semver
@@ -38,13 +38,15 @@ namespace ThoseWereTheDays
             { 1970109064, -1203731809 }, // Coffee Shop
             { RestaurantSettingReferences.SantaWorkshopSetting, LayoutProfileReferences.LayoutProfile },//_northPoleLayoutProfileCopy?.GameDataObject?.ID ?? 0 }//
             { -31920316, 206333080 }, // Bakery
+            { 424841351, 394042671 }, // Witch Hut
         };
 
         internal static Dictionary<int, HashSet<int>> SettingSpecialDecoration => new Dictionary<int, HashSet<int>>()
         {
             { RestaurantSettingReferences.FebruarySetting, new HashSet<int>() { ApplianceReferences.FlowerArch, ApplianceReferences.HeartBalloons, ApplianceReferences.LoveSign } },
             { RestaurantSettingReferences.SantaWorkshopSetting, new HashSet<int>() { ApplianceReferences.ChristmasBanner, ApplianceReferences.ChristmasTree } },
-            { RestaurantSettingReferences.Halloween, new HashSet<int>() { ApplianceReferences.Pumpkin, ApplianceReferences.Cobwebs, ApplianceReferences.GhostStatue } }
+            { RestaurantSettingReferences.Halloween, new HashSet<int>() { ApplianceReferences.Pumpkin, ApplianceReferences.Cobwebs, ApplianceReferences.GhostStatue } },
+            { 424841351, new HashSet<int>() { ApplianceReferences.Pumpkin, ApplianceReferences.Cobwebs, ApplianceReferences.GhostStatue, -379172217, -119593913, -1552572658 } }    // Shelf, Pumpkin Stack, Candles
         };
 
         //internal static Dictionary<int, HashSet<int>> SettingDisabledAppliances => new Dictionary<int, HashSet<int>>()

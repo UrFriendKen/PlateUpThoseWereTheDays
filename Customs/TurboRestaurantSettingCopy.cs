@@ -45,7 +45,18 @@ namespace ThoseWereTheDays.Customs
             GameDataObject gdo = GDOUtils.GetExistingGDO(restaurantSettingID);
             if (gdo == null || !(gdo is RestaurantSetting restaurantSetting))
                 return new List<(Locale, BasicInfo)>();
-            return restaurantSetting.Info.GetLocales().Select(locale => (locale, restaurantSetting.Info.Get(locale))).ToList();
+            return restaurantSetting.Info.GetLocales().Select(locale => (locale, GetConvertedInfo(locale))).ToList();
+
+            BasicInfo GetConvertedInfo(Locale locale)
+            {
+                BasicInfo infoToCopy = restaurantSetting.Info.Get(locale);
+                BasicInfo info = new BasicInfo()
+                {
+                    Name = $"{infoToCopy.Name ?? "Turbo"} (Legacy)",
+                    Description = infoToCopy.Description
+                };
+                return info;
+            }
         }
     }
 }
